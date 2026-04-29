@@ -1,0 +1,28 @@
+[
+  {
+    "id": 1,
+    "titulo": "El Padrino",
+    "director": "Francis Ford Coppola",
+    "anio": 1972,
+    "duracionMinutos": 175,
+    "vista": true
+  },
+  {
+    "id": 2,
+    "titulo": "asdf",
+    "director": "asdf",
+    "genero": "asdf",
+    "anio": 2134,
+    "duracionMinutos": 22,
+    "vista": true
+  },
+  {
+    "id": 3,
+    "titulo": "rey león",
+    "director": "director1",
+    "genero": "animado",
+    "anio": 2000,
+    "duracionMinutos": 84,
+    "vista": true
+  }
+]
