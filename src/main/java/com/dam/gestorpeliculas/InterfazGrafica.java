@@ -45,7 +45,7 @@ public class InterfazGrafica extends JFrame {
         add(titulo, BorderLayout.NORTH);
 
         modeloTabla = new DefaultTableModel();
-        modeloTabla.setColumnIdentifiers(new String[]{
+        modeloTabla.setColumnIdentifiers(new String[] {
                 "ID", "Título", "Director", "Género", "Año", "Duración", "Vista"
         });
 
@@ -106,44 +106,125 @@ public class InterfazGrafica extends JFrame {
         add(panelSur, BorderLayout.SOUTH);
         cargarDatosEnTabla();
     }
+
+    /*
+     * IA: Método generado y revisado con asistencia de IA para añadir una película
+     * validando campos obligatorios, números correctos e identificadores
+     * duplicados.
+     */
     private void agregarPelicula() {
-    try {
-        int id = Integer.parseInt(campoId.getText().trim());
-        String titulo = campoTitulo.getText().trim();
-        String director = campoDirector.getText().trim();
-        String genero = campoGenero.getText().trim();
-        int anio = Integer.parseInt(campoAnio.getText().trim());
-        int duracion = Integer.parseInt(campoDuracion.getText().trim());
-        boolean vista = checkVista.isSelected();
+        try {
+            String textoId = campoId.getText().trim();
+            String titulo = campoTitulo.getText().trim();
+            String director = campoDirector.getText().trim();
+            String genero = campoGenero.getText().trim();
+            String textoAnio = campoAnio.getText().trim();
+            String textoDuracion = campoDuracion.getText().trim();
 
-        Pelicula nuevaPelicula = new Pelicula(
-                id, titulo, director, genero, anio, duracion, vista
-        );
-        
-        peliculas.add(nuevaPelicula);
-        gestorJson.guardarPeliculas(peliculas);
-        cargarDatosEnTabla();
+            if (textoId.isEmpty() || titulo.isEmpty() || director.isEmpty()
+                    || genero.isEmpty() || textoAnio.isEmpty() || textoDuracion.isEmpty()) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Todos los campos son obligatorios.",
+                        "Error de validación",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-        JOptionPane.showMessageDialog(
-                this,
-                "Película añadida correctamente.",
-                "Información",
-                JOptionPane.INFORMATION_MESSAGE
-        );
+            int id = Integer.parseInt(textoId);
+            int anio = Integer.parseInt(textoAnio);
+            int duracion = Integer.parseInt(textoDuracion);
 
-    } catch (NumberFormatException e) {
-        JOptionPane.showMessageDialog(
-                this,
-                "El ID, el año y la duración deben ser números.",
-                "Error de formato",
-                JOptionPane.ERROR_MESSAGE
-        );
+            if (id <= 0) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "El ID debe ser mayor que 0.",
+                        "Error de validación",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (existeId(id)) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Ya existe una película con ese ID.",
+                        "Error de validación",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (anio < 1888 || anio > 2100) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "El año debe estar entre 1888 y 2100.",
+                        "Error de validación",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (duracion <= 0) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "La duración debe ser mayor que 0 minutos.",
+                        "Error de validación",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            boolean vista = checkVista.isSelected();
+
+            Pelicula nuevaPelicula = new Pelicula(
+                    id,
+                    titulo,
+                    director,
+                    genero,
+                    anio,
+                    duracion,
+                    vista);
+
+            peliculas.add(nuevaPelicula);
+            gestorJson.guardarPeliculas(peliculas);
+            cargarDatosEnTabla();
+            limpiarCampos();
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Película añadida correctamente.",
+                    "Información",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "El ID, el año y la duración deben ser números enteros.",
+                    "Error de formato",
+                    JOptionPane.ERROR_MESSAGE);
+        }
     }
-}
-    private void cargarDatosEnTabla(){
+
+    private boolean existeId(int id) {
+        for (Pelicula pelicula : peliculas) {
+            if (pelicula.getId() == id) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void limpiarCampos() {
+        campoId.setText("");
+        campoTitulo.setText("");
+        campoDirector.setText("");
+        campoGenero.setText("");
+        campoAnio.setText("");
+        campoDuracion.setText("");
+        checkVista.setSelected(false);
+    }
+
+    private void cargarDatosEnTabla() {
         modeloTabla.setRowCount(0);
         for (Pelicula pelicula : peliculas) {
-            modeloTabla.addRow(new Object[]{
+            modeloTabla.addRow(new Object[] {
                     pelicula.getId(),
                     pelicula.getTitulo(),
                     pelicula.getDirector(),
