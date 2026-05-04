@@ -9,7 +9,8 @@ public class Pelicula {
     private int duracionMinutos;
     private boolean vista;
 
-    public Pelicula (int id, String titulo, String director, String genero, int anio, int duracionMinutos, boolean vista) {
+    public Pelicula(int id, String titulo, String director, String genero, int anio, int duracionMinutos,
+            boolean vista) {
         this.id = id;
         this.titulo = titulo;
         this.director = director;
@@ -45,6 +46,34 @@ public class Pelicula {
 
     public boolean isVista() {
         return vista;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setTitulo(String titulo) {
+        this.titulo = titulo;
+    }
+
+    public void setDirector(String director) {
+        this.director = director;
+    }
+
+    public void setGenero(String genero) {
+        this.genero = genero;
+    }
+
+    public void setAnio(int anio) {
+        this.anio = anio;
+    }
+
+    public void setDuracionMinutos(int duracionMinutos) {
+        this.duracionMinutos = duracionMinutos;
+    }
+
+    public void setVista(boolean vista) {
+        this.vista = vista;
     }
 
     @Override

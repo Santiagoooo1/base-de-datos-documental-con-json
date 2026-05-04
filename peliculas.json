@@ -2,19 +2,11 @@
   {
     "id": 1,
     "titulo": "El Padrino",
-    "director": "Francis Ford Coppola",
-    "anio": 1972,
-    "duracionMinutos": 175,
-    "vista": true
-  },
-  {
-    "id": 2,
-    "titulo": "asdf",
-    "director": "asdf",
-    "genero": "asdf",
-    "anio": 2134,
-    "duracionMinutos": 22,
-    "vista": true
+    "director": "Francis Ford Coppolaaa",
+    "genero": "as",
+    "anio": 1900,
+    "duracionMinutos": 11,
+    "vista": false
   },
   {
     "id": 3,

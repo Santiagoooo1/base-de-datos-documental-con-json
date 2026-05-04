@@ -25,6 +25,7 @@ public class InterfazGrafica extends JFrame {
     private JButton botonModificar;
     private JButton botonEliminar;
     private JButton botonLimpiar;
+    private boolean limpiandoCampos = false;
 
     public InterfazGrafica() {
         setTitle("Gestor de Películas");
@@ -50,6 +51,7 @@ public class InterfazGrafica extends JFrame {
         });
 
         tablaPeliculas = new JTable(modeloTabla);
+        tablaPeliculas.getSelectionModel().addListSelectionListener(e -> cargarPeliculaSeleccionada());
         JScrollPane scrollTabla = new JScrollPane(tablaPeliculas);
         add(scrollTabla, BorderLayout.CENTER);
 
@@ -89,9 +91,13 @@ public class InterfazGrafica extends JFrame {
         botonAgregar = new JButton("Agregar");
         botonAgregar.addActionListener(e -> agregarPelicula());
         botonBuscar = new JButton("Buscar");
+        botonBuscar.addActionListener(e -> buscarPelicula());
         botonModificar = new JButton("Modificar");
+        botonModificar.addActionListener(e -> modificarPelicula());
         botonEliminar = new JButton("Eliminar");
+        botonEliminar.addActionListener(e -> eliminarPelicula());
         botonLimpiar = new JButton("Limpiar");
+        botonLimpiar.addActionListener(e -> limpiarCampos());
 
         panelBotones.add(botonAgregar);
         panelBotones.add(botonBuscar);
@@ -107,11 +113,6 @@ public class InterfazGrafica extends JFrame {
         cargarDatosEnTabla();
     }
 
-    /*
-     * IA: Método generado y revisado con asistencia de IA para añadir una película
-     * validando campos obligatorios, números correctos e identificadores
-     * duplicados.
-     */
     private void agregarPelicula() {
         try {
             String textoId = campoId.getText().trim();
@@ -212,6 +213,8 @@ public class InterfazGrafica extends JFrame {
     }
 
     private void limpiarCampos() {
+        limpiandoCampos = true;
+
         campoId.setText("");
         campoTitulo.setText("");
         campoDirector.setText("");
@@ -219,6 +222,9 @@ public class InterfazGrafica extends JFrame {
         campoAnio.setText("");
         campoDuracion.setText("");
         checkVista.setSelected(false);
+        tablaPeliculas.clearSelection();
+
+        limpiandoCampos = false;
     }
 
     private void cargarDatosEnTabla() {
@@ -234,5 +240,220 @@ public class InterfazGrafica extends JFrame {
                     pelicula.isVista() ? "Sí" : "No"
             });
         }
+    }
+
+    private void buscarPelicula() {
+        String textoBusqueda = JOptionPane.showInputDialog(
+                this,
+                "Introduce ID, título, director, género o año:",
+                "Buscar película",
+                JOptionPane.QUESTION_MESSAGE);
+
+        if (textoBusqueda == null) {
+            return;
+        }
+
+        textoBusqueda = textoBusqueda.trim().toLowerCase();
+
+        if (textoBusqueda.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Debes introducir un texto de búsqueda.",
+                    "Error de búsqueda",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        modeloTabla.setRowCount(0);
+
+        for (Pelicula pelicula : peliculas) {
+            boolean coincide = String.valueOf(pelicula.getId()).equals(textoBusqueda)
+                    || textoSeguro(pelicula.getTitulo()).contains(textoBusqueda)
+                    || textoSeguro(pelicula.getDirector()).contains(textoBusqueda)
+                    || textoSeguro(pelicula.getGenero()).contains(textoBusqueda)
+                    || String.valueOf(pelicula.getAnio()).equals(textoBusqueda);
+
+            if (coincide) {
+                modeloTabla.addRow(new Object[] {
+                        pelicula.getId(),
+                        pelicula.getTitulo(),
+                        pelicula.getDirector(),
+                        pelicula.getGenero(),
+                        pelicula.getAnio(),
+                        pelicula.getDuracionMinutos(),
+                        pelicula.isVista() ? "Sí" : "No"
+                });
+            }
+        }
+
+        if (modeloTabla.getRowCount() == 0) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "No se encontraron películas con ese criterio.",
+                    "Sin resultados",
+                    JOptionPane.INFORMATION_MESSAGE);
+            cargarDatosEnTabla();
+        }
+    }
+
+    private String textoSeguro(String texto) {
+        return texto == null ? "" : texto.toLowerCase();
+    }
+
+    private void cargarPeliculaSeleccionada() {
+        if (limpiandoCampos) {
+            return;
+        }
+
+        int fila = tablaPeliculas.getSelectedRow();
+
+        if (fila >= 0 && !tablaPeliculas.getSelectionModel().getValueIsAdjusting()) {
+            campoId.setText(valorTablaSeguro(fila, 0));
+            campoTitulo.setText(valorTablaSeguro(fila, 1));
+            campoDirector.setText(valorTablaSeguro(fila, 2));
+            campoGenero.setText(valorTablaSeguro(fila, 3));
+            campoAnio.setText(valorTablaSeguro(fila, 4));
+            campoDuracion.setText(valorTablaSeguro(fila, 5));
+
+            String vista = valorTablaSeguro(fila, 6);
+            checkVista.setSelected(vista.equals("Sí"));
+        }
+    }
+
+    private void modificarPelicula() {
+        try {
+            int filaSeleccionada = tablaPeliculas.getSelectedRow();
+
+            if (filaSeleccionada == -1) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Debes seleccionar una película de la tabla.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            String textoId = campoId.getText().trim();
+            String titulo = campoTitulo.getText().trim();
+            String director = campoDirector.getText().trim();
+            String genero = campoGenero.getText().trim();
+            String textoAnio = campoAnio.getText().trim();
+            String textoDuracion = campoDuracion.getText().trim();
+
+            if (textoId.isEmpty() || titulo.isEmpty() || director.isEmpty()
+                    || genero.isEmpty() || textoAnio.isEmpty() || textoDuracion.isEmpty()) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Todos los campos son obligatorios.",
+                        "Error de validación",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            int id = Integer.parseInt(textoId);
+            int anio = Integer.parseInt(textoAnio);
+            int duracion = Integer.parseInt(textoDuracion);
+            boolean vista = checkVista.isSelected();
+
+            if (id <= 0) {
+                JOptionPane.showMessageDialog(this, "El ID debe ser mayor que 0.");
+                return;
+            }
+
+            if (anio < 1888 || anio > 2100) {
+                JOptionPane.showMessageDialog(this, "El año debe estar entre 1888 y 2100.");
+                return;
+            }
+
+            if (duracion <= 0) {
+                JOptionPane.showMessageDialog(this, "La duración debe ser mayor que 0.");
+                return;
+            }
+
+            int idOriginal = Integer.parseInt(modeloTabla.getValueAt(filaSeleccionada, 0).toString());
+
+            for (Pelicula pelicula : peliculas) {
+                if (pelicula.getId() == id && id != idOriginal) {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Ya existe otra película con ese ID.",
+                            "Error de validación",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+
+            for (Pelicula pelicula : peliculas) {
+                if (pelicula.getId() == idOriginal) {
+                    pelicula.setId(id);
+                    pelicula.setTitulo(titulo);
+                    pelicula.setDirector(director);
+                    pelicula.setGenero(genero);
+                    pelicula.setAnio(anio);
+                    pelicula.setDuracionMinutos(duracion);
+                    pelicula.setVista(vista);
+                    break;
+                }
+            }
+
+            gestorJson.guardarPeliculas(peliculas);
+            cargarDatosEnTabla();
+            limpiarCampos();
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Película modificada correctamente.",
+                    "Información",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "El ID, el año y la duración deben ser números enteros.",
+                    "Error de formato",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void eliminarPelicula() {
+        int filaSeleccionada = tablaPeliculas.getSelectedRow();
+
+        if (filaSeleccionada == -1) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Debes seleccionar una película de la tabla.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        int confirmacion = JOptionPane.showConfirmDialog(
+                this,
+                "¿Seguro que quieres eliminar esta película?",
+                "Confirmar eliminación",
+                JOptionPane.YES_NO_OPTION);
+
+        if (confirmacion != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        int id = Integer.parseInt(modeloTabla.getValueAt(filaSeleccionada, 0).toString());
+
+        peliculas.removeIf(pelicula -> pelicula.getId() == id);
+
+        gestorJson.guardarPeliculas(peliculas);
+        cargarDatosEnTabla();
+        limpiarCampos();
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Película eliminada correctamente.",
+                "Información",
+                JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private String valorTablaSeguro(int fila, int columna) {
+        Object valor = modeloTabla.getValueAt(fila, columna);
+        return valor == null ? "" : valor.toString();
     }
 }

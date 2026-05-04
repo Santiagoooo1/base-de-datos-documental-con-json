@@ -1,1 +1,5 @@
 com\dam\gestorpeliculas\App.class
+com\dam\gestorpeliculas\GestorJson.class
+com\dam\gestorpeliculas\InterfazGrafica.class
+com\dam\gestorpeliculas\Pelicula.class
+com\dam\gestorpeliculas\PeliculasEnvoltorio.class
